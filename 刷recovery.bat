@@ -85,7 +85,6 @@ if "%EXTENSION%" == "zip" (
 )
 
 :CHECK_FASTBOOT
-echo 检查设备是否处于fastboot模式
 set DEVICE_FOUND=false
 for /f "tokens=1" %%i in ('%EXTRACT_DIR%\platform-tools\fastboot.exe devices') do (
     set DEVICE=%%i
@@ -97,7 +96,6 @@ if "%DEVICE_FOUND%"=="false" (
 echo sn: %DEVICE% 
 
 :FLASH_IMG
-REM 遍历解压目录中的 img 文件并刷写 recovery
 for /R %EXTRACT_DIR% %%i in (*.img) do (
     echo Flashing %%i
     for /f "tokens=*" %%j in ('%EXTRACT_DIR%\platform-tools\fastboot.exe flash recovery %%i 2^>^&1') do (
@@ -105,6 +103,7 @@ for /R %EXTRACT_DIR% %%i in (*.img) do (
         echo !CHECK_FLASH!
     )
     if "!CHECK_FLASH:Finished=!"=="!CHECK_FLASH!" (
+        echo 刷入失败
         goto CHECK_FASTBOOT
     )
     goto CLEANUP
@@ -127,8 +126,6 @@ if /I "%RETRY%"=="y" (
 :CLEANUP
 echo 清理文件
 rmdir /S /Q %EXTRACT_DIR%
-
-echo 脚本结束
 
 endlocal
 pause
